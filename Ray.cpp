@@ -1,5 +1,4 @@
 #include "Ray.h"
-#include "parser.h"
 #include "utils.cpp"
 
 Ray generate_ray(const parser::Camera &camera, int i, int j, float pixel_width,
