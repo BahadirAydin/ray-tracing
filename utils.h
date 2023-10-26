@@ -15,6 +15,10 @@ parser::Vec3f cross_product(const parser::Vec3f &a, const parser::Vec3f &b) {
 parser::Vec3f add_vectors(const parser::Vec3f &a, const parser::Vec3f &b) {
   return {a.x + b.x, a.y + b.y, a.z + b.z};
 }
+parser::Vec3f substract_vectors(const parser::Vec3f &a,
+                                const parser::Vec3f &b) {
+  return {a.x - b.x, a.y - b.y, a.z - b.z};
+}
 parser::Vec3f multiply_vector(const parser::Vec3f &a, float b) {
   return {a.x * b, a.y * b, a.z * b};
 }
