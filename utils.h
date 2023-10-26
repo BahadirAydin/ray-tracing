@@ -1,3 +1,6 @@
+
+#ifndef UTILS_H
+#define UTILS_H
 #include "parser.h"
 #include <cmath>
 
@@ -26,3 +29,4 @@ void normalize(parser::Vec3f &vec) {
   vec.y /= magnitude;
   vec.z /= magnitude;
 }
+#endif // UTILS_H
