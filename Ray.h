@@ -40,6 +40,7 @@ Ray generate_ray(const parser::Camera &camera, int i, int j, float pixel_width,
   float su = (i + 0.5) * pixel_width;
   float sv = (j + 0.5) * pixel_height;
 
+  
   parser::Vec3f m = add_vectors(e, multiply_vector(gaze, distance));
 
   parser::Vec3f q =
@@ -52,6 +53,9 @@ Ray generate_ray(const parser::Camera &camera, int i, int j, float pixel_width,
   Ray ray;
   ray.set_origin(e);
   parser::Vec3f direction = add_vectors(s, multiply_vector(e, -1));
+  
+  ray.set_direction(direction);
+
   return ray;
 }
 
