@@ -8,11 +8,9 @@
 class Ray {
 public:
   void set_origin(const parser::Vec3f &origin) { this->origin = origin; }
-
   void set_direction(const parser::Vec3f &direction) {
     this->direction = direction;
   }
-
   parser::Vec3f get_origin() const { return origin; }
   parser::Vec3f get_direction() const { return direction; }
 
@@ -34,20 +32,15 @@ Ray generate_ray(const parser::Camera &camera, int i, int j, float pixel_width,
   parser::Vec3f e = camera.position;
   parser::Vec3f gaze = camera.gaze;
   parser::Vec3f v = camera.up;
+  parser::Vec3f w = camera.w;
+  parser::Vec3f u = camera.u;
+  parser::Vec3f q = camera.q;
   parser::Vec4f near_plane = camera.near_plane;
+  parser::Vec3f m = camera.plane_center;
   float distance = camera.near_distance;
-
-  parser::Vec3f w = {-gaze.x, -gaze.y, -gaze.z};
-  parser::Vec3f u = cross_product(v, w);
 
   float su = (i + 0.5) * pixel_width;
   float sv = (j + 0.5) * pixel_height;
-
-  parser::Vec3f m = add_vectors(e, multiply_vector(gaze, distance));
-
-  parser::Vec3f q =
-      add_vectors(m, add_vectors(multiply_vector(u, near_plane.x),
-                                 multiply_vector(v, near_plane.w)));
 
   parser::Vec3f s = add_vectors(
       q, add_vectors(multiply_vector(u, su), multiply_vector(v, -1 * sv)));
@@ -103,5 +96,6 @@ float intersect_triangle(const parser::Vec3f &vertex1,
   // TODO implement barycentric coordinates method
   return 0;
 }
-float intersect_mesh()
+//TODO
+float intersect_mesh() { return 0; }
 #endif // RAY_H

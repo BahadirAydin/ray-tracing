@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     float pixel_height = (cam.near_plane.w - cam.near_plane.z) / ny;
     for (int y = 0; y < ny; ++y) {
       for (int x = 0; x < nx; ++x) {
-        Ray r = generate_ray(cam, y, x, pixel_width, pixel_height);
+        Ray r = generate_ray(cam, x, y, pixel_width, pixel_height);
         for (parser::Sphere sphere : scene.spheres) {
           // TODO find the first object hit by the ray and its surface normal n
           //  set pixel color to value computed from hit point, light and n
