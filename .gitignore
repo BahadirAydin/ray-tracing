@@ -2,6 +2,7 @@ raytracer
 
 # Prerequisites
 *.d
+*.ppm
 
 # Compiled Object files
 *.slo

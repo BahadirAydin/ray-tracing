@@ -1,6 +1,6 @@
 #include "parser.h"
-#include "utils.h"
 #include "tinyxml2.h"
+#include "utils.h"
 #include <sstream>
 #include <stdexcept>
 
@@ -64,7 +64,7 @@ void parser::Scene::loadFromXml(const std::string &filepath) {
     stream << child->GetText() << std::endl;
     child = element->FirstChildElement("ImageName");
     stream << child->GetText() << std::endl;
-stream >> camera.position.x >> camera.position.y >> camera.position.z;
+    stream >> camera.position.x >> camera.position.y >> camera.position.z;
     stream >> camera.gaze.x >> camera.gaze.y >> camera.gaze.z;
     stream >> camera.up.x >> camera.up.y >> camera.up.z;
     stream >> camera.near_plane.x >> camera.near_plane.y >>
