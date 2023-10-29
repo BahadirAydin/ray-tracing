@@ -34,5 +34,9 @@ inline void normalize(parser::Vec3f &vec) {
   vec.z /= magnitude;
 }
 
+inline float calc_det(float x00,float x01,float x02,float x10,float x11,float x12,float x20,float x21,float x22)
+{
+    return (x00 * ((x11 * x22) - (x21 * x12))) - (x10 * ((x22 * x01) - (x02 * x21))) + (x20 * ((x01 * x12) - (x02 * x11)));
+}
 #endif // UTILS_H
 
