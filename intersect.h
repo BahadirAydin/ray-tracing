@@ -80,4 +80,5 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
             intersections.push_back(intersection);
         }
     }
+    //TODO 
 }
