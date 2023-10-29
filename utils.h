@@ -15,7 +15,7 @@ inline parser::Vec3f add_vectors(const parser::Vec3f &a, const parser::Vec3f &b)
   return {a.x + b.x, a.y + b.y, a.z + b.z};
 }
 
-inline parser::Vec3f substract_vectors(const parser::Vec3f &a, const parser::Vec3f &b) {
+inline parser::Vec3f subtract_vectors(const parser::Vec3f &a, const parser::Vec3f &b) {
   return {a.x - b.x, a.y - b.y, a.z - b.z};
 }
 

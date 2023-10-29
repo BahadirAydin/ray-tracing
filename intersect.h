@@ -16,9 +16,9 @@ inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
     parser::Vec3f direction = r.get_direction();
 
     float a = dot_product(direction, direction);
-    float b = 2 * dot_product(direction, substract_vectors(origin, vertex));
-    float c = dot_product(substract_vectors(origin, vertex),
-                          substract_vectors(origin, vertex)) -
+    float b = 2 * dot_product(direction, subtract_vectors(origin, vertex));
+    float c = dot_product(subtract_vectors(origin, vertex),
+                          subtract_vectors(origin, vertex)) -
               radius * radius;
 
     float delta = b * b - 4 * a * c;
@@ -72,7 +72,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
             intersection.point = add_vectors(
                 r.get_origin(), multiply_vector(r.get_direction(), t));
             parser::Vec3f normal =
-                substract_vectors(intersection.point, center);
+                subtract_vectors(intersection.point, center);
             normalize(normal);
             intersection.normal = normal;
             intersection.material = s.materials[sphere.material_id - 1];

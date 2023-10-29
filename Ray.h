@@ -47,7 +47,7 @@ inline Ray generate_ray(const parser::Camera &camera, int i, int j,
 
     Ray ray;
     ray.set_origin(e);
-    parser::Vec3f direction = substract_vectors(s, e);
+    parser::Vec3f direction = subtract_vectors(s, e);
 
     ray.set_direction(direction);
 
