@@ -26,8 +26,8 @@ class Ray {
     parser::Vec3f direction;
 };
 
-inline Ray generate_ray(const parser::Camera &camera, int i, int j, float pixel_width,
-                 float pixel_height) {
+inline Ray generate_ray(const parser::Camera &camera, int i, int j,
+                        float pixel_width, float pixel_height) {
 
     parser::Vec3f e = camera.position;
     parser::Vec3f gaze = camera.gaze;
@@ -55,7 +55,7 @@ inline Ray generate_ray(const parser::Camera &camera, int i, int j, float pixel_
 }
 
 inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
-                       const Ray &r) {
+                              const Ray &r) {
     parser::Vec3f origin = r.get_origin();
     parser::Vec3f direction = r.get_direction();
 
@@ -91,8 +91,8 @@ inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
 }
 
 inline float intersect_triangle(const parser::Vec3f &vertex1,
-                         const parser::Vec3f &vertex2,
-                         const parser::Vec3f &vertex3, const Ray &r) {
+                                const parser::Vec3f &vertex2,
+                                const parser::Vec3f &vertex3, const Ray &r) {
     // TODO implement barycentric coordinates method
     return 0;
 }
