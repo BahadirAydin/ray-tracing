@@ -53,49 +53,4 @@ inline Ray generate_ray(const parser::Camera &camera, int i, int j,
 
     return ray;
 }
-
-inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
-                              const Ray &r) {
-    parser::Vec3f origin = r.get_origin();
-    parser::Vec3f direction = r.get_direction();
-
-    float a = dot_product(direction, direction);
-    float b = 2 * dot_product(direction, substract_vectors(origin, vertex));
-    float c = dot_product(substract_vectors(origin, vertex),
-                          substract_vectors(origin, vertex)) -
-              radius * radius;
-
-    float delta = b * b - 4 * a * c;
-
-    // std::cout << "delta: " << delta << std::endl;
-    if (delta < 0) {
-        return -1;
-    }
-
-    float t1 = (-b + std::sqrt(delta)) / (2 * a);
-    float t2 = (-b - std::sqrt(delta)) / (2 * a);
-
-    if (t1 < 0 && t2 < 0) {
-        return -1;
-    }
-
-    if (t1 < 0) {
-        return t2;
-    }
-
-    if (t2 < 0) {
-        return t1;
-    }
-
-    return std::min(t1, t2);
-}
-
-inline float intersect_triangle(const parser::Vec3f &vertex1,
-                                const parser::Vec3f &vertex2,
-                                const parser::Vec3f &vertex3, const Ray &r) {
-    // TODO implement barycentric coordinates method
-    return 0;
-}
-// TODO
-inline float intersect_mesh() { return 0; }
 #endif // RAY_H

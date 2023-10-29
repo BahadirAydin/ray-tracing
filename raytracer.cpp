@@ -1,6 +1,7 @@
 #include "Ray.h"
 #include "parser.h"
 #include "ppm.h"
+#include "intersect.h"
 
 typedef unsigned char RGB[3];
 
