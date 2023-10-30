@@ -53,9 +53,30 @@ inline float intersect_triangle(const parser::Vec3f & vertex1,
    const parser::Vec3f & vertex2,
       const parser::Vec3f & vertex3,
          const Ray & r) {
-   // TODO implement barycentric coordinates method
-   return 0;
+   parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
+   parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
+   parser::Vec3f h = cross_product(r.get_direction(), edge2);
+   float a = dot_product(edge1, h);
+
+   if (a > -0.00001 && a < 0.00001) return -1;
+
+   float f = 1.0 / a;
+   parser::Vec3f s = subtract_vectors(r.get_origin(), vertex1);
+   float u = f * dot_product(s, h);
+
+   if (u < 0.0 || u > 1.0) return -1;
+
+   parser::Vec3f q = cross_product(s, edge1);
+   float v = f * dot_product(r.get_direction(), q);
+
+   if (v < 0.0 || u + v > 1.0) return -1;
+
+   float t = f * dot_product(edge2, q);
+   if (t > 0.00001) return t;
+
+   return -1;
 }
+
 // TODO
 inline float intersect_mesh() {
    return 0;
@@ -86,5 +107,30 @@ inline std::vector < Intersection > intersect_objects(const Ray & r,
          intersections.push_back(intersection);
       }
    }
+
+   for (const parser::Triangle & triangle: s.triangles) {
+      parser::Vec3f vertex1 = s.vertex_data[triangle.indices.v0_id - 1];
+      parser::Vec3f vertex2 = s.vertex_data[triangle.indices.v1_id - 1];
+      parser::Vec3f vertex3 = s.vertex_data[triangle.indices.v2_id - 1];
+
+      float t = intersect_triangle(vertex1, vertex2, vertex3, r);
+
+      if (t > 0) {
+         Intersection intersection;
+         intersection.point = add_vectors(r.get_origin(), multiply_vector(r.get_direction(), t));
+
+         parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
+         parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
+         parser::Vec3f cross_val = cross_product(edge1, edge2);
+         intersection.normal = normalize(cross_val);
+
+         intersection.material = s.materials[triangle.material_id - 1];
+         intersection.t = t;
+         intersections.push_back(intersection);
+      }
+   }
    //TODO 
+   //mesh calc.
+
+   return intersections;
 }

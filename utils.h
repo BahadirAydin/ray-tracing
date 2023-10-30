@@ -27,11 +27,16 @@ inline float dot_product(const parser::Vec3f &a, const parser::Vec3f &b) {
   return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline void normalize(parser::Vec3f &vec) {
-  float magnitude = std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+inline float get_magn(const parser::Vec3f &vec) {
+  return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
+}
+
+inline parser::Vec3f normalize(parser::Vec3f &vec) {
+  float magnitude = get_magn(vec);
   vec.x /= magnitude;
   vec.y /= magnitude;
   vec.z /= magnitude;
+  return vec;
 }
 
 inline float calc_det(float x00,float x01,float x02,float x10,float x11,float x12,float x20,float x21,float x22)
