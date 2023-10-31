@@ -3,6 +3,7 @@ raytracer
 # Prerequisites
 *.d
 *.ppm
+.clang-format
 
 # Compiled Object files
 *.slo
