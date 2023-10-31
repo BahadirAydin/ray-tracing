@@ -77,9 +77,22 @@ inline float intersect_triangle(const parser::Vec3f & vertex1,
    return -1;
 }
 
-// TODO
-inline float intersect_mesh() {
-   return 0;
+inline float intersect_mesh(const parser::Mesh &mesh, const std::vector<parser::Vec3f> &vertex_data, const Ray &r) {
+   float closest_t = std::numeric_limits<float>::infinity(); 
+
+   for (const parser::Face &face : mesh.faces) {
+      const parser::Vec3f &v0 = vertex_data[face.v0_id - 1];
+      const parser::Vec3f &v1 = vertex_data[face.v1_id - 1];
+      const parser::Vec3f &v2 = vertex_data[face.v2_id - 1];
+
+      float t = intersect_triangle(v0, v1, v2, r);
+
+      if (t > 0 && t < closest_t) {
+         closest_t = t;
+      }
+   }
+
+   return closest_t == std::numeric_limits<float>::infinity() ? -1 : closest_t;
 }
 
 inline std::vector < Intersection > intersect_objects(const Ray & r,
