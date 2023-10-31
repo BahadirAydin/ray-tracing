@@ -80,6 +80,7 @@ inline parser::Vec3f compute_background_color(const parser::Vec3f &pixel,
             to_light.y /= distance_to_light;
             to_light.z /= distance_to_light;
 
+            // HACK burada gaze vektörünün tersini kullanmamız gerekiyor olabilir ama kafam karıştı
             float d = dot_product(to_light, {0, 0, 1});
 
             if (d > 0) {
