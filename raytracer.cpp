@@ -28,20 +28,20 @@ int main(int argc, char *argv[]) {
                 std::vector<Intersection> intersection =
                     intersect_objects(r, scene);
                 float min_t = std::numeric_limits<float>::max();
+                Intersection closest_intersection;
                 for (Intersection inter : intersection) {
                     if (inter.t < min_t) {
                         min_t = inter.t;
-                        parser::Vec3f color = compute_color(scene, inter);
-                        image[i] = color.x;
-                        image[i + 1] = color.y;
-                        image[i + 2] = color.z;
+                        closest_intersection = inter;
                     }
                 }
                 if (min_t == std::numeric_limits<float>::max()) {
-                    parser::Vec3f pixel =
-                        add_vectors(r.get_origin(), r.get_direction());
+                    image[i] = scene.background_color.x;
+                    image[i + 1] = scene.background_color.y;
+                    image[i + 2] = scene.background_color.z;
+                } else {
                     parser::Vec3f color =
-                        compute_background_color(pixel, scene);
+                        compute_color(scene, closest_intersection, r);
                     image[i] = color.x;
                     image[i + 1] = color.y;
                     image[i + 2] = color.z;

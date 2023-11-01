@@ -1,6 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "Ray.h"
 #include "intersect.h"
 #include "parser.h"
 #include "utils.h"
@@ -22,6 +23,32 @@ inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
     return {0, 0, 0};
 }
 
+inline parser::Vec3f
+calculate_diffuse(const parser::Vec3f &material_diffuse,
+                  const parser::Vec3f &irradiance, const parser::Vec3f &normal,
+                  const parser::Vec3f &to_light_normalized) {
+    parser::Vec3f diffuse = {0, 0, 0};
+    float theta = std::max(0.0f, dot_product(normal, to_light_normalized));
+    diffuse.x = material_diffuse.x * irradiance.x * theta;
+    diffuse.y = material_diffuse.y * irradiance.y * theta;
+    diffuse.z = material_diffuse.z * irradiance.z * theta;
+    return diffuse;
+}
+
+inline parser::Vec3f calculate_specular(float phong,
+                                        const parser::Vec3f &normal,
+                                        const parser::Vec3f &material_specular,
+                                        const parser::Vec3f &irradiance,
+                                        const parser::Vec3f &half) {
+    parser::Vec3f specular = {0, 0, 0};
+    float a = std::max(0.0f, dot_product(normal, half));
+    float b = std::pow(a, phong);
+    specular.x = material_specular.x * irradiance.x * b;
+    specular.y = material_specular.y * irradiance.y * b;
+    specular.z = material_specular.z * irradiance.z * b;
+    return specular;
+}
+
 inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
                                const parser::Vec3f &intersection_point) {
     Ray shadow_ray;
@@ -32,10 +59,10 @@ inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
 }
 
 inline parser::Vec3f compute_color(const parser::Scene &scene,
-                                   const Intersection &intersection) {
+                                   const Intersection &intersection,
+                                   const Ray &r) {
     parser::Vec3f color = {0, 0, 0};
 
-    // Ambient lighting component
     parser::Vec3f ambient_color = {
         scene.ambient_light.x * intersection.material.ambient.x,
         scene.ambient_light.y * intersection.material.ambient.y,
@@ -45,6 +72,9 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
     color.y += ambient_color.y;
     color.z += ambient_color.z;
 
+    parser::Vec3f eye_v = subtract_vectors(r.get_origin(), intersection.point);
+    parser::Vec3f normalized_eye_v = normalize(eye_v);
+
     for (const parser::PointLight &light : scene.point_lights) {
         parser::Vec3f to_light =
             subtract_vectors(light.position, intersection.point);
@@ -53,10 +83,34 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
         Ray shadow_ray = generate_shadow_ray(
             scene.shadow_ray_epsilon, intersection.point, to_light_normalized);
 
-        parser::Vec3f irradiance =
-            calculate_irradiance(light, to_light, intersection.normal);
-
-        float d = dot_product(to_light, intersection.normal);
+        std::vector<Intersection> shadow_intersections =
+            intersect_objects(shadow_ray, scene);
+        float min_t = std::numeric_limits<float>::max();
+        Intersection closest_intersection;
+        for (Intersection inter : shadow_intersections) {
+            if (inter.t > 0.0f && inter.t - min_t < 0.0001f) {
+                min_t = inter.t;
+                closest_intersection = inter;
+            }
+        }
+        if (min_t == std::numeric_limits<float>::max()) {
+            min_t = 0.0f;
+        }
+        if (std::abs(min_t - get_magn(to_light)) > 0.0f) {
+            parser::Vec3f irradiance = calculate_irradiance(
+                light, to_light_normalized, intersection.normal);
+            parser::Vec3f diffuse =
+                calculate_diffuse(intersection.material.diffuse, irradiance,
+                                  intersection.normal, to_light_normalized);
+            parser::Vec3f half =
+                (add_vectors(to_light_normalized, normalized_eye_v));
+            parser::Vec3f specular = calculate_specular(
+                intersection.material.phong_exponent, intersection.normal,
+                intersection.material.specular, irradiance, normalize(half));
+            color.x += diffuse.x + specular.x;
+            color.y += diffuse.y + specular.y;
+            color.z += diffuse.z + specular.z;
+        }
     }
 
     color.x = std::max(0.0f, std::min(255.0f, color.x));
@@ -66,51 +120,9 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
     return color;
 }
 
-inline parser::Vec3f compute_background_color(const parser::Vec3f &pixel,
-                                              const parser::Scene &scene) {
-    parser::Vec3f color = {0, 0, 0};
+inline parser::Vec3i compute_background_color(const parser::Scene &scene) {
+    parser::Vec3i color = scene.background_color;
 
-    parser::Vec3f ambient_color = {
-        scene.ambient_light.x * scene.background_color.x,
-        scene.ambient_light.y * scene.background_color.y,
-        scene.ambient_light.z * scene.background_color.z};
-
-    color.x += ambient_color.x;
-    color.y += ambient_color.y;
-    color.z += ambient_color.z;
-
-    for (const parser::PointLight &light : scene.point_lights) {
-        parser::Vec3f to_light = {light.position.x - pixel.x,
-                                  light.position.y - pixel.y,
-                                  light.position.z - pixel.z};
-        float distance_to_light =
-            sqrt(to_light.x * to_light.x + to_light.y * to_light.y +
-                 to_light.z * to_light.z);
-
-        if (distance_to_light > 0) {
-            to_light.x /= distance_to_light;
-            to_light.y /= distance_to_light;
-            to_light.z /= distance_to_light;
-
-            // HACK burada gaze vektörünün tersini kullanmamız gerekiyor
-            // olabilir ama kafam karıştı
-            float d = dot_product(to_light, {0, 0, 1});
-
-            if (d > 0) {
-                parser::Vec3f diffuse_color = {
-                    scene.background_color.x * light.intensity.x * d,
-                    scene.background_color.y * light.intensity.y * d,
-                    scene.background_color.z * light.intensity.z * d};
-
-                color.x += diffuse_color.x;
-                color.y += diffuse_color.y;
-                color.z += diffuse_color.z;
-            }
-        }
-    }
-    color.x = std::max(0.0f, std::min(255.0f, color.x));
-    color.y = std::max(0.0f, std::min(255.0f, color.y));
-    color.z = std::max(0.0f, std::min(255.0f, color.z));
     return color;
 }
 
