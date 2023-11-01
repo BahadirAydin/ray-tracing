@@ -5,6 +5,23 @@
 #include "parser.h"
 #include "utils.h"
 
+inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
+                                          const parser::Vec3f &to_light,
+                                          const parser::Vec3f &normal) {
+    float distance_to_light = get_magn(to_light);
+
+    if (distance_to_light > 0) {
+        float irradiance_x =
+            light.intensity.x / (distance_to_light * distance_to_light);
+        float irradiance_y =
+            light.intensity.y / (distance_to_light * distance_to_light);
+        float irradiance_z =
+            light.intensity.z / (distance_to_light * distance_to_light);
+        return {irradiance_x, irradiance_y, irradiance_z};
+    }
+    return {0, 0, 0};
+}
+
 inline parser::Vec3f compute_color(const parser::Scene &scene,
                                    const Intersection &intersection) {
     parser::Vec3f color = {0, 0, 0};
@@ -20,31 +37,11 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
     color.z += ambient_color.z;
 
     for (const parser::PointLight &light : scene.point_lights) {
-        parser::Vec3f to_light = {light.position.x - intersection.point.x,
-                                  light.position.y - intersection.point.y,
-                                  light.position.z - intersection.point.z};
-        float distance_to_light =
-            sqrt(to_light.x * to_light.x + to_light.y * to_light.y +
-                 to_light.z * to_light.z);
+        parser::Vec3f to_light =
+            subtract_vectors(light.position, intersection.point);
 
-        if (distance_to_light > 0) {
-            to_light.x /= distance_to_light;
-            to_light.y /= distance_to_light;
-            to_light.z /= distance_to_light;
-
-            float d = dot_product(to_light, intersection.normal);
-
-            if (d > 0) {
-                parser::Vec3f diffuse_color = {
-                    intersection.material.diffuse.x * light.intensity.x * d,
-                    intersection.material.diffuse.y * light.intensity.y * d,
-                    intersection.material.diffuse.z * light.intensity.z * d};
-
-                color.x += diffuse_color.x;
-                color.y += diffuse_color.y;
-                color.z += diffuse_color.z;
-            }
-        }
+        parser::Vec3f irradiance =
+            calculate_irradiance(light, to_light, intersection.normal);
     }
 
     color.x = std::max(0.0f, std::min(255.0f, color.x));
@@ -80,7 +77,8 @@ inline parser::Vec3f compute_background_color(const parser::Vec3f &pixel,
             to_light.y /= distance_to_light;
             to_light.z /= distance_to_light;
 
-            // HACK burada gaze vektörünün tersini kullanmamız gerekiyor olabilir ama kafam karıştı
+            // HACK burada gaze vektörünün tersini kullanmamız gerekiyor
+            // olabilir ama kafam karıştı
             float d = dot_product(to_light, {0, 0, 1});
 
             if (d > 0) {

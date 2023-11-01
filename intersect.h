@@ -4,6 +4,7 @@
 #include "Ray.h"
 #include "parser.h"
 #include "utils.h"
+#include <complex>
 #include <limits>
 #include <vector>
 
@@ -109,10 +110,9 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
     for (parser::Sphere sphere : spheres) {
         parser::Vec3f center = s.vertex_data[sphere.center_vertex_id - 1];
         t = intersect_sphere(center, sphere.radius, r);
-        if (t > 0) {
+        if (std::abs(t - 0.0001) > 0) {
             Intersection intersection;
-            intersection.point = add_vectors(
-                r.get_origin(), multiply_vector(r.get_direction(), t));
+            intersection.point = r.get_point(t);
             parser::Vec3f normal = subtract_vectors(intersection.point, center);
             normal = normalize(normal);
             intersection.normal = normal;
@@ -131,8 +131,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
         if (t > 0) {
             Intersection intersection;
-            intersection.point = add_vectors(
-                r.get_origin(), multiply_vector(r.get_direction(), t));
+            intersection.point = r.get_point(t);
 
             parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
             parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
@@ -155,8 +154,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
             if (t > 0) {
                 Intersection intersection;
-                intersection.point = add_vectors(
-                    r.get_origin(), multiply_vector(r.get_direction(), t));
+                intersection.point = r.get_point(t);
 
                 parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
                 parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
