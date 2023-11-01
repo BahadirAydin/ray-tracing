@@ -72,7 +72,7 @@ inline float intersect_triangle(const parser::Vec3f &vertex1,
         return -1;
 
     float t = f * dot_product(edge2, q);
-    if (t > 0.00001)
+    if (t > 0.0f)
         return t;
 
     return -1;
@@ -110,7 +110,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
     for (parser::Sphere sphere : spheres) {
         parser::Vec3f center = s.vertex_data[sphere.center_vertex_id - 1];
         t = intersect_sphere(center, sphere.radius, r);
-        if (std::abs(t - 0.0001) > 0) {
+        if (t > 0.0f) {
             Intersection intersection;
             intersection.point = r.get_point(t);
             parser::Vec3f normal = subtract_vectors(intersection.point, center);
@@ -129,7 +129,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
         float t = intersect_triangle(vertex1, vertex2, vertex3, r);
 
-        if (t > 0) {
+        if (t > 0.0f) {
             Intersection intersection;
             intersection.point = r.get_point(t);
 
@@ -152,7 +152,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
             float t = intersect_triangle(vertex1, vertex2, vertex3, r);
 
-            if (t > 0) {
+            if (t > 0.0f) {
                 Intersection intersection;
                 intersection.point = r.get_point(t);
 
