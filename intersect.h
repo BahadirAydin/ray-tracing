@@ -32,7 +32,7 @@ inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
     float t1 = (-b + std::sqrt(delta)) / (2 * a);
     float t2 = (-b - std::sqrt(delta)) / (2 * a);
 
-    if (t1 < 0.00001 && t2 < 0.00001) {
+    if (t1 < 0.0f && t2 < 0.0f) {
         return -1;
     }
 
@@ -98,19 +98,18 @@ inline float intersect_mesh(const parser::Mesh &mesh,
     return closest_t == std::numeric_limits<float>::infinity() ? -1 : closest_t;
 }
 
-inline std::vector<Intersection> intersect_objects(const Ray &r,
-                                                   const parser::Scene &s) {
+inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
     std::vector<parser::Sphere> spheres = s.spheres;
     std::vector<parser::Triangle> triangles = s.triangles;
     std::vector<parser::Mesh> meshes = s.meshes;
 
-    std::vector<Intersection> intersections;
-
     float t = -1;
+    Intersection min_intersection;
+    min_intersection.t = std::numeric_limits<float>::infinity();
     for (parser::Sphere sphere : spheres) {
         parser::Vec3f center = s.vertex_data[sphere.center_vertex_id - 1];
         t = intersect_sphere(center, sphere.radius, r);
-        if (t > 0.0f) {
+        if (t > 0.0f && t < min_intersection.t) {
             Intersection intersection;
             intersection.point = r.get_point(t);
             parser::Vec3f normal = subtract_vectors(intersection.point, center);
@@ -118,7 +117,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
             intersection.normal = normal;
             intersection.material = s.materials[sphere.material_id - 1];
             intersection.t = t;
-            intersections.push_back(intersection);
+            min_intersection = intersection;
         }
     }
 
@@ -129,7 +128,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
         float t = intersect_triangle(vertex1, vertex2, vertex3, r);
 
-        if (t > 0.0f) {
+        if (t > 0.0f && t < min_intersection.t) {
             Intersection intersection;
             intersection.point = r.get_point(t);
 
@@ -137,10 +136,9 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
             parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
             parser::Vec3f cross_val = cross_product(edge1, edge2);
             intersection.normal = normalize(cross_val);
-
             intersection.material = s.materials[triangle.material_id - 1];
             intersection.t = t;
-            intersections.push_back(intersection);
+            min_intersection = intersection;
         }
     }
 
@@ -152,7 +150,7 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
             float t = intersect_triangle(vertex1, vertex2, vertex3, r);
 
-            if (t > 0.0f) {
+            if (t > 0.0f && t < min_intersection.t) {
                 Intersection intersection;
                 intersection.point = r.get_point(t);
 
@@ -163,10 +161,10 @@ inline std::vector<Intersection> intersect_objects(const Ray &r,
 
                 intersection.material = s.materials[mesh.material_id - 1];
                 intersection.t = t;
-                intersections.push_back(intersection);
+                min_intersection = intersection;
             }
         }
     }
-    return intersections;
+    return min_intersection;
 }
 #endif

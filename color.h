@@ -5,6 +5,7 @@
 #include "intersect.h"
 #include "parser.h"
 #include "utils.h"
+#include <limits>
 
 inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
                                           const parser::Vec3f &to_light,
@@ -83,17 +84,10 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
         Ray shadow_ray = generate_shadow_ray(
             scene.shadow_ray_epsilon, to_light_normalized, intersection.point);
 
-        std::vector<Intersection> shadow_intersections =
-            intersect_objects(shadow_ray, scene);
-        float min_t = std::numeric_limits<float>::max();
-        Intersection closest_intersection;
-        for (Intersection inter : shadow_intersections) {
-            if (inter.t > 0.0f && inter.t < min_t) {
-                min_t = inter.t;
-                closest_intersection = inter;
-            }
-        }
-        if (min_t == std::numeric_limits<float>::max()) {
+        Intersection shadow_intersection = intersect_objects(shadow_ray, scene);
+
+        float min_t = shadow_intersection.t;
+        if (min_t == std::numeric_limits<float>::infinity()) {
             min_t = 0.0f;
         }
         if (min_t - get_magn(to_light) < 0.0f) {

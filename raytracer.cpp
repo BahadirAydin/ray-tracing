@@ -25,23 +25,14 @@ int main(int argc, char *argv[]) {
         for (int y = 0; y < ny; ++y) {
             for (int x = 0; x < nx; ++x) {
                 Ray r = generate_ray(cam, x, y, pixel_width, pixel_height);
-                std::vector<Intersection> intersection =
-                    intersect_objects(r, scene);
-                float min_t = std::numeric_limits<float>::max();
-                Intersection closest_intersection;
-                for (Intersection inter : intersection) {
-                    if (inter.t < min_t) {
-                        min_t = inter.t;
-                        closest_intersection = inter;
-                    }
-                }
-                if (min_t == std::numeric_limits<float>::max()) {
+                Intersection intersection = intersect_objects(r, scene);
+                if (intersection.t == std::numeric_limits<float>::infinity()) {
+
                     image[i] = scene.background_color.x;
                     image[i + 1] = scene.background_color.y;
                     image[i + 2] = scene.background_color.z;
                 } else {
-                    parser::Vec3f color =
-                        compute_color(scene, closest_intersection, r);
+                    parser::Vec3f color = compute_color(scene, intersection, r);
                     image[i] = color.x + 0.5;
                     image[i + 1] = color.y + 0.5;
                     image[i + 2] = color.z + 0.5;
