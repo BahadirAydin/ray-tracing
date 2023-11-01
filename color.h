@@ -81,7 +81,7 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
         parser::Vec3f to_light_normalized = normalize(to_light);
 
         Ray shadow_ray = generate_shadow_ray(
-            scene.shadow_ray_epsilon, intersection.point, to_light_normalized);
+            scene.shadow_ray_epsilon, to_light_normalized, intersection.point);
 
         std::vector<Intersection> shadow_intersections =
             intersect_objects(shadow_ray, scene);
@@ -122,7 +122,6 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
 
 inline parser::Vec3i compute_background_color(const parser::Scene &scene) {
     parser::Vec3i color = scene.background_color;
-
     return color;
 }
 
