@@ -88,7 +88,7 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
         float min_t = std::numeric_limits<float>::max();
         Intersection closest_intersection;
         for (Intersection inter : shadow_intersections) {
-            if (inter.t > 0.0f && inter.t - min_t < 0.0001f) {
+            if (inter.t > 0.0f && inter.t < min_t) {
                 min_t = inter.t;
                 closest_intersection = inter;
             }
@@ -96,7 +96,7 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
         if (min_t == std::numeric_limits<float>::max()) {
             min_t = 0.0f;
         }
-        if (std::abs(min_t - get_magn(to_light)) > 0.0f) {
+        if (min_t - get_magn(to_light) < 0.0f) {
             parser::Vec3f irradiance = calculate_irradiance(
                 light, to_light_normalized, intersection.normal);
             parser::Vec3f diffuse =
