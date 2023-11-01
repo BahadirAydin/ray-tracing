@@ -42,9 +42,9 @@ int main(int argc, char *argv[]) {
                 } else {
                     parser::Vec3f color =
                         compute_color(scene, closest_intersection, r);
-                    image[i] = color.x;
-                    image[i + 1] = color.y;
-                    image[i + 2] = color.z;
+                    image[i] = color.x + 0.5;
+                    image[i + 1] = color.y + 0.5;
+                    image[i + 2] = color.z + 0.5;
                 }
                 i += 3;
             }
