@@ -22,6 +22,15 @@ inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
     return {0, 0, 0};
 }
 
+inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
+                               const parser::Vec3f &intersection_point) {
+    Ray shadow_ray;
+    shadow_ray.set_origin(add_vectors(intersection_point,
+                                      multiply_vector(normalized_light, eps)));
+    shadow_ray.set_direction(normalized_light);
+    return shadow_ray;
+}
+
 inline parser::Vec3f compute_color(const parser::Scene &scene,
                                    const Intersection &intersection) {
     parser::Vec3f color = {0, 0, 0};
@@ -39,9 +48,15 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
     for (const parser::PointLight &light : scene.point_lights) {
         parser::Vec3f to_light =
             subtract_vectors(light.position, intersection.point);
+        parser::Vec3f to_light_normalized = normalize(to_light);
+
+        Ray shadow_ray = generate_shadow_ray(
+            scene.shadow_ray_epsilon, intersection.point, to_light_normalized);
 
         parser::Vec3f irradiance =
             calculate_irradiance(light, to_light, intersection.normal);
+
+        float d = dot_product(to_light, intersection.normal);
     }
 
     color.x = std::max(0.0f, std::min(255.0f, color.x));
