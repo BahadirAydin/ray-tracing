@@ -56,7 +56,7 @@ inline float intersect_triangle(const parser::Vec3f &vertex1,
   parser::Vec3f h = cross_product(r.get_direction(), edge2);
   float a = dot_product(edge1, h);
 
-  if (std::abs(a) < std::numeric_limits<float>::epsilon()){
+  if (std::abs(a) < std::numeric_limits<float>::epsilon()) {
     return -1;
   }
 

@@ -8,21 +8,17 @@
 #include <limits>
 
 inline parser::Vec3f compute_color(const parser::Scene &scene,
-                                   const Intersection &intersection, Ray &r,
-                                   bool print_flag);
+                                   const Intersection &intersection, Ray &r);
 
 inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
                                           const parser::Vec3f &light_dir,
-                                          const parser::Vec3f &normal) {
-  float distance_light_dir = get_magn(light_dir);
+                                          const parser::Vec3f &normal,
+                                          float distance_to_light) {
 
-  if (distance_light_dir > 0) {
-    float irradiance_x =
-        light.intensity.x / (distance_light_dir * distance_light_dir);
-    float irradiance_y =
-        light.intensity.y / (distance_light_dir * distance_light_dir);
-    float irradiance_z =
-        light.intensity.z / (distance_light_dir * distance_light_dir);
+  if (distance_to_light > 0) {
+    float irradiance_x = light.intensity.x / std::pow(distance_to_light, 2);
+    float irradiance_y = light.intensity.y / std::pow(distance_to_light, 2);
+    float irradiance_z = light.intensity.z / std::pow(distance_to_light, 2);
     return {irradiance_x, irradiance_y, irradiance_z};
   }
   return {0, 0, 0};
@@ -44,16 +40,19 @@ inline parser::Vec3f calculate_specular(float phong,
                                         const parser::Vec3f &normal,
                                         const parser::Vec3f &material_specular,
                                         const parser::Vec3f &irradiance,
-                                        const parser::Vec3f &half) {
+                                        const parser::Vec3f &half,
+                                        float distance_to_light) {
   parser::Vec3f specular = {0, 0, 0};
   float a = std::max(0.0f, dot_product(normal, half));
   float b = std::pow(a, phong);
-  specular.x = material_specular.x * irradiance.x * b;
-  specular.y = material_specular.y * irradiance.y * b;
-  specular.z = material_specular.z * irradiance.z * b;
+  specular.x =
+      (material_specular.x * irradiance.x * b) / std::pow(distance_to_light, 2);
+  specular.y =
+      (material_specular.y * irradiance.y * b) / std::pow(distance_to_light, 2);
+  specular.z =
+      (material_specular.z * irradiance.z * b) / std::pow(distance_to_light, 2);
   return specular;
 }
-
 
 inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
                                const parser::Vec3f &intersection_point) {
@@ -65,8 +64,7 @@ inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
 }
 
 inline parser::Vec3f apply_shading(const parser::Scene &scene,
-                                   const Intersection &intersection, Ray &r,
-                                   bool print_flag) {
+                                   const Intersection &intersection, Ray &r) {
 
   // start with the ambient light
   parser::Vec3f ambient_color = {
@@ -74,17 +72,10 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       scene.ambient_light.y * intersection.material.ambient.y,
       scene.ambient_light.z * intersection.material.ambient.z};
 
-
   parser::Vec3f color;
   color.x = ambient_color.x;
   color.y = ambient_color.y;
   color.z = ambient_color.z;
-  if (print_flag) {
-      std::cout << intersection.material.diffuse.x << " " << intersection.material.diffuse.y << " " << intersection.material.diffuse.z << std::endl;
-    std::cout << "ambient color: " << ambient_color.x << " " << ambient_color.y
-              << " " << ambient_color.z << std::endl;
-  }
-
   parser::Vec3f eye_v = subtract_vectors(r.get_origin(), intersection.point);
   parser::Vec3f normalized_eye_v = normalize(eye_v);
 
@@ -105,9 +96,9 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 
     reflected_ray.set_depth(r.get_depth() + 1);
     color = add_vectors(
-        color, multiply_vector(compute_color(scene, intersection, reflected_ray,
-                                             print_flag),
-                               intersection.material.phong_exponent));
+        color,
+        multiply_vector(compute_color(scene, intersection, reflected_ray),
+                        intersection.material.phong_exponent));
   }
 
   // add the diffuse and specular terms
@@ -121,23 +112,16 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
         scene.shadow_ray_epsilon, to_light_normalized, intersection.point);
 
     Intersection shadow_intersection = intersect_objects(shadow_ray, scene);
+    float distance_to_light = get_magn(to_light);
 
     float min_t = shadow_intersection.t;
-    if (print_flag) {
-      std::cout << "shadow intersection: " << shadow_intersection.point.x
-                << " " << shadow_intersection.point.y << " "
-                << shadow_intersection.point.z << std::endl;
-      std::cout << "shadow normal: " << shadow_intersection.normal.x << " "
-                << shadow_intersection.normal.y << " "
-                << shadow_intersection.normal.z << std::endl;
-      std::cout << "shadow t: " << shadow_intersection.t << std::endl;
-    }
+
     if (min_t == std::numeric_limits<float>::infinity()) {
       min_t = 0.0f;
     }
     if (min_t - get_magn(to_light_normalized) < 0.0f) {
-      parser::Vec3f irradiance =
-          calculate_irradiance(light, to_light_normalized, intersection.normal);
+      parser::Vec3f irradiance = calculate_irradiance(
+          light, to_light_normalized, intersection.normal, distance_to_light);
       parser::Vec3f diffuse =
           calculate_diffuse(intersection.material.diffuse, irradiance,
                             intersection.normal, to_light_normalized);
@@ -145,14 +129,11 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       parser::Vec3f normalized_half = normalize(half);
       parser::Vec3f specular = calculate_specular(
           intersection.material.phong_exponent, intersection.normal,
-          intersection.material.specular, irradiance, normalized_half);
+          intersection.material.specular, irradiance, normalized_half,
+          distance_to_light);
       color.x += diffuse.x + specular.x;
       color.y += diffuse.y + specular.y;
       color.z += diffuse.z + specular.z;
-      if(print_flag) {
-        std::cout << "diffuse: " << diffuse.x << " " << diffuse.y << " " << diffuse.z << std::endl;
-        std::cout << "specular: " << specular.x << " " << specular.y << " " << specular.z << std::endl;
-      }
     }
   }
 
@@ -160,8 +141,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 }
 
 inline parser::Vec3f compute_color(const parser::Scene &scene,
-                                   const Intersection &intersection, Ray &r,
-                                   bool print_flag) {
+                                   const Intersection &intersection, Ray &r) {
 
   if (r.get_depth() > scene.max_recursion_depth) {
 
@@ -170,22 +150,8 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
   }
 
   if (!intersection.is_null) {
-    if (print_flag) {
-      std::cout << "intersection: " << intersection.point.x << " "
-                << intersection.point.y << " " << intersection.point.z
-                << std::endl;
-      std::cout << "normal: " << intersection.normal.x << " "
-                << intersection.normal.y << " " << intersection.normal.z
-                << std::endl;
-    }
-    return apply_shading(scene, intersection, r, print_flag);
+    return apply_shading(scene, intersection, r);
   } else if (r.get_depth() == 0) {
-    if (print_flag) {
-      std::cout << "background color: " << scene.background_color.x << " "
-                << scene.background_color.y << " " << scene.background_color.z
-                << std::endl;
-    }
-
     parser::Vec3f background_color = {(float)scene.background_color.x,
                                       (float)scene.background_color.y,
                                       (float)scene.background_color.z};
