@@ -44,17 +44,18 @@ inline parser::Vec3f calculate_specular(float phong,
   parser::Vec3f specular = {0, 0, 0};
   float a = std::max(0.0f, dot_product(normal, half));
   float b = std::pow(a, phong);
-  specular.x = (material_specular.x * irradiance.x * b);
-  specular.y = (material_specular.y * irradiance.y * b);
-  specular.z = (material_specular.z * irradiance.z * b);
+  specular.x = material_specular.x * irradiance.x * b;
+  specular.y = material_specular.y * irradiance.y * b;
+  specular.z = material_specular.z * irradiance.z * b;
   return specular;
 }
 
 inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
                                const parser::Vec3f &intersection_point) {
   Ray shadow_ray;
-  shadow_ray.set_origin(
-      add_vectors(intersection_point, multiply_vector(normalized_light, eps)));
+  parser::Vec3f origin = add_vectors(intersection_point,
+                                     multiply_vector(normalized_light, eps));
+  shadow_ray.set_origin(origin);
   shadow_ray.set_direction(normalized_light);
   return shadow_ray;
 }
