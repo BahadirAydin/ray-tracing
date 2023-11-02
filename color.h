@@ -74,7 +74,6 @@ inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
 
 inline parser::Vec3f apply_shading(const parser::Scene &scene,
                                    const Intersection &intersection, Ray &r) {
-  parser::Vec3f color = {0, 0, 0};
 
   // start with the ambient light
   parser::Vec3f ambient_color = {
@@ -82,9 +81,10 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       scene.ambient_light.y * intersection.material.ambient.y,
       scene.ambient_light.z * intersection.material.ambient.z};
 
-  color.x += ambient_color.x;
-  color.y += ambient_color.y;
-  color.z += ambient_color.z;
+  parser::Vec3f color;
+  color.x = ambient_color.x;
+  color.y = ambient_color.y;
+  color.z = ambient_color.z;
 
   parser::Vec3f eye_v = subtract_vectors(r.get_origin(), intersection.point);
   parser::Vec3f normalized_eye_v = normalize(eye_v);
@@ -142,10 +142,6 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       color.z += diffuse.z + specular.z;
     }
   }
-
-  color.x = std::max(0.0f, std::min(255.0f, color.x));
-  color.y = std::max(0.0f, std::min(255.0f, color.y));
-  color.z = std::max(0.0f, std::min(255.0f, color.z));
 
   return color;
 }

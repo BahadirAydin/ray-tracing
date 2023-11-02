@@ -49,7 +49,7 @@ inline float calc_det(float x00, float x01, float x02, float x10, float x11,
          (x20 * ((x01 * x12) - (x02 * x11)));
 }
 
-inline parser::Vec3f clamp(parser::Vec3f color) {
+inline parser::Vec3f clamp(parser::Vec3f &color) {
   parser::Vec3f c;
   c.x = std::max(0.0f, std::min(255.0f, color.x));
   c.y = std::max(0.0f, std::min(255.0f, color.y));

@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
         Intersection intersection = intersect_objects(r, scene);
 
         parser::Vec3f color = compute_color(scene, intersection, r);
+        color = clamp(color);
 
         clamp(color);
 
@@ -44,7 +45,9 @@ int main(int argc, char *argv[]) {
         image[i + 1] = color.y + 0.5;
         image[i + 2] = color.z + 0.5;
 
-        i += 3;
+        image[i++] = color.x + 0.5;
+        image[i++] = color.y + 0.5;
+        image[i++] = color.z + 0.5;
       }
     }
 
