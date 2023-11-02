@@ -40,17 +40,13 @@ inline parser::Vec3f calculate_specular(float phong,
                                         const parser::Vec3f &normal,
                                         const parser::Vec3f &material_specular,
                                         const parser::Vec3f &irradiance,
-                                        const parser::Vec3f &half,
-                                        float distance_to_light) {
+                                        const parser::Vec3f &half) {
   parser::Vec3f specular = {0, 0, 0};
   float a = std::max(0.0f, dot_product(normal, half));
   float b = std::pow(a, phong);
-  specular.x =
-      (material_specular.x * irradiance.x * b) / std::pow(distance_to_light, 2);
-  specular.y =
-      (material_specular.y * irradiance.y * b) / std::pow(distance_to_light, 2);
-  specular.z =
-      (material_specular.z * irradiance.z * b) / std::pow(distance_to_light, 2);
+  specular.x = (material_specular.x * irradiance.x * b);
+  specular.y = (material_specular.y * irradiance.y * b);
+  specular.z = (material_specular.z * irradiance.z * b);
   return specular;
 }
 
@@ -129,8 +125,8 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       parser::Vec3f normalized_half = normalize(half);
       parser::Vec3f specular = calculate_specular(
           intersection.material.phong_exponent, intersection.normal,
-          intersection.material.specular, irradiance, normalized_half,
-          distance_to_light);
+          intersection.material.specular, irradiance, normalized_half);
+
       color.x += diffuse.x + specular.x;
       color.y += diffuse.y + specular.y;
       color.z += diffuse.z + specular.z;
