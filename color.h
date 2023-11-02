@@ -154,17 +154,14 @@ inline parser::Vec3f compute_color(const parser::Scene &scene,
                                    const Intersection &intersection, Ray &r) {
 
   if (r.get_depth() > scene.max_recursion_depth) {
-    std::cout << "here 1" << std::endl;
 
     parser::Vec3f color = {0, 0, 0};
     return color;
   }
 
   if (!intersection.is_null) {
-    std::cout << "here 2" << std::endl;
     return apply_shading(scene, intersection, r);
   } else if (r.get_depth() == 0) {
-    std::cout << "here 3" << std::endl;
 
     parser::Vec3f background_color = {(float)scene.background_color.x,
                                       (float)scene.background_color.y,
