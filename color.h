@@ -112,10 +112,8 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 
     float min_t = shadow_intersection.t;
 
-    if (min_t == std::numeric_limits<float>::infinity()) {
-      min_t = 0.0f;
-    }
-    if (min_t - get_magn(to_light_normalized) < 0.0f) {
+    if (min_t == std::numeric_limits<float>::infinity() ||
+        min_t - get_magn(to_light_normalized) < 0.0f) {
       parser::Vec3f irradiance = calculate_irradiance(
           light, to_light_normalized, intersection.normal, distance_to_light);
       parser::Vec3f diffuse =
