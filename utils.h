@@ -2,6 +2,7 @@
 #define UTILS_H
 #include "parser.h"
 #include <cmath>
+#include <iostream>
 
 inline parser::Vec3f cross_product(const parser::Vec3f &a,
                                    const parser::Vec3f &b) {
@@ -35,11 +36,19 @@ inline float get_magn(const parser::Vec3f &vec) {
 }
 
 inline parser::Vec3f normalize(parser::Vec3f &vec) {
+  parser::Vec3f result;
   float magnitude = get_magn(vec);
-  vec.x /= magnitude;
-  vec.y /= magnitude;
-  vec.z /= magnitude;
-  return vec;
+  if (magnitude == 0) {
+    return {0, 0, 0};
+  }
+  result.x = vec.x / magnitude;
+  result.y = vec.y / magnitude;
+  result.z = vec.z / magnitude;
+  // std::cout << "magnitude: " << magnitude << std::endl;
+  // std::cout << "vec: " << vec.x << " " << vec.y << " " << vec.z << std::endl;
+  // std::cout << "normalize: " << result.x << " " << result.y << " " <<
+  // result.z << std::endl;
+  return result;
 }
 
 inline float calc_det(float x00, float x01, float x02, float x10, float x11,

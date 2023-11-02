@@ -56,20 +56,21 @@ inline float intersect_triangle(const parser::Vec3f &vertex1,
   parser::Vec3f h = cross_product(r.get_direction(), edge2);
   float a = dot_product(edge1, h);
 
-  if (a > -0.00001 && a < 0.00001)
+  if (std::abs(a) < std::numeric_limits<float>::epsilon()){
     return -1;
+  }
 
-  float f = 1.0 / a;
+  float f = 1.0f / a;
   parser::Vec3f s = subtract_vectors(r.get_origin(), vertex1);
   float u = f * dot_product(s, h);
 
-  if (u < 0.0 || u > 1.0)
+  if (u < 0.0f || u > 1.0f)
     return -1;
 
   parser::Vec3f q = cross_product(s, edge1);
   float v = f * dot_product(r.get_direction(), q);
 
-  if (v < 0.0 || u + v > 1.0)
+  if (v < 0.0f || u + v > 1.0f)
     return -1;
 
   float t = f * dot_product(edge2, q);
@@ -77,26 +78,6 @@ inline float intersect_triangle(const parser::Vec3f &vertex1,
     return t;
 
   return -1;
-}
-
-inline float intersect_mesh(const parser::Mesh &mesh,
-                            const std::vector<parser::Vec3f> &vertex_data,
-                            const Ray &r) {
-  float closest_t = std::numeric_limits<float>::infinity();
-
-  for (const parser::Face &face : mesh.faces) {
-    const parser::Vec3f &v0 = vertex_data[face.v0_id - 1];
-    const parser::Vec3f &v1 = vertex_data[face.v1_id - 1];
-    const parser::Vec3f &v2 = vertex_data[face.v2_id - 1];
-
-    float t = intersect_triangle(v0, v1, v2, r);
-
-    if (t > 0 && t < closest_t) {
-      closest_t = t;
-    }
-  }
-
-  return closest_t == std::numeric_limits<float>::infinity() ? -1 : closest_t;
 }
 
 inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
@@ -114,8 +95,7 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
       Intersection intersection;
       intersection.point = r.get_point(t);
       parser::Vec3f normal = subtract_vectors(intersection.point, center);
-      normal = normalize(normal);
-      intersection.normal = normal;
+      intersection.normal = normalize(normal);
       intersection.material = s.materials[sphere.material_id - 1];
       intersection.t = t;
       min_intersection = intersection;
@@ -123,7 +103,6 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
     }
   }
 
-  t = -1;
   for (const parser::Triangle &triangle : s.triangles) {
     parser::Vec3f vertex1 = s.vertex_data[triangle.indices.v0_id - 1];
     parser::Vec3f vertex2 = s.vertex_data[triangle.indices.v1_id - 1];
@@ -146,7 +125,6 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
     }
   }
 
-  t = -1;
   for (const parser::Mesh &mesh : s.meshes) {
     for (const parser::Face &face : mesh.faces) {
       parser::Vec3f vertex1 = s.vertex_data[face.v0_id - 1];
