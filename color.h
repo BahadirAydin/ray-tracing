@@ -76,9 +76,11 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
   parser::Vec3f eye_v = subtract_vectors(r.get_origin(), intersection.point);
   parser::Vec3f normalized_eye_v = normalize(eye_v);
 
+  int current_depth = r.get_depth();
+
   // add the color from the mirror direction
   if (intersection.material.is_mirror &&
-      r.get_depth() < scene.max_recursion_depth) {
+      current_depth < scene.max_recursion_depth) {
     Ray reflected_ray;
     float cos_theta = dot_product(intersection.normal, normalized_eye_v);
     parser::Vec3f reflected_ray_dir =
@@ -95,12 +97,18 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
     Intersection reflected_intersection =
         intersect_objects(reflected_ray, scene);
 
-    if (!reflected_intersection.is_null) {
-      reflected_ray.set_depth(r.get_depth() + 1);
-      color = add_vectors(
-          color, multiply_vector(compute_color(scene, reflected_intersection,
-                                               reflected_ray),
-                                 intersection.material.phong_exponent));
+    if (!reflected_intersection.is_null && reflected_intersection.t > 0) {
+      reflected_ray.set_depth(current_depth + 1);
+      parser::Vec3f reflected_color =
+          compute_color(scene, reflected_intersection, reflected_ray);
+
+      reflected_color.x *= intersection.material.mirror.x;
+      reflected_color.y *= intersection.material.mirror.y;
+      reflected_color.z *= intersection.material.mirror.z;
+
+      color.x += reflected_color.x;
+      color.y += reflected_color.y;
+      color.z += reflected_color.z;
     }
   }
 
