@@ -64,4 +64,12 @@ inline parser::Vec3f clamp(parser::Vec3f &color) {
   return c;
 }
 
+inline parser::Vec3f calculate_triangle_normal(const parser::Vec3f &vertex1,
+                                               const parser::Vec3f &vertex2,
+                                               const parser::Vec3f &vertex3) {
+  parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
+  parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
+  return normalize(cross_product(edge1, edge2));
+}
+
 #endif // UTILS_H

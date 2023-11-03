@@ -112,10 +112,8 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
       Intersection intersection;
       intersection.point = r.get_point(t);
 
-      const parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
-      const parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
-      const parser::Vec3f cross_val = cross_product(edge1, edge2);
-      intersection.normal = normalize(cross_val);
+      intersection.normal =
+          calculate_triangle_normal(vertex1, vertex2, vertex3);
       intersection.material = &s.materials[triangle.material_id - 1];
       intersection.t = t;
       min_intersection = intersection;
@@ -125,20 +123,19 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
 
   for (const parser::Mesh &mesh : s.meshes) {
     for (const parser::Face &face : mesh.faces) {
-      parser::Vec3f vertex1 = s.vertex_data[face.v0_id - 1];
-      parser::Vec3f vertex2 = s.vertex_data[face.v1_id - 1];
-      parser::Vec3f vertex3 = s.vertex_data[face.v2_id - 1];
+      const parser::Vec3f vertex1 = s.vertex_data[face.v0_id - 1];
+      const parser::Vec3f vertex2 = s.vertex_data[face.v1_id - 1];
+      const parser::Vec3f vertex3 = s.vertex_data[face.v2_id - 1];
+
+      const parser::Vec3f triangle_normal =
+          calculate_triangle_normal(vertex1, vertex2, vertex3);
 
       float t = intersect_triangle(vertex1, vertex2, vertex3, r);
 
       if (t > 0.0f && t < min_intersection.t) {
         Intersection intersection;
         intersection.point = r.get_point(t);
-
-        const parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
-        const parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
-        const parser::Vec3f cross_val = cross_product(edge1, edge2);
-        intersection.normal = normalize(cross_val);
+        intersection.normal = triangle_normal;
 
         intersection.material = &s.materials[mesh.material_id - 1];
         intersection.t = t;
