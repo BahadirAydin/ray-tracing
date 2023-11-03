@@ -57,12 +57,10 @@ inline parser::Vec3f calculate_specular(float phong,
 
 inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
                                const parser::Vec3f &intersection_point) {
-  Ray shadow_ray;
-  parser::Vec3f origin =
+  const parser::Vec3f origin =
       add_vectors(intersection_point, multiply_vector(normalized_light, eps));
-  shadow_ray.set_origin(origin);
-  shadow_ray.set_direction(multiply_vector(normalized_light, eps));
-  return shadow_ray;
+  const parser::Vec3f direction = multiply_vector(normalized_light, eps);
+  return Ray(origin, direction);
 }
 
 inline parser::Vec3f apply_shading(const parser::Scene &scene,
@@ -86,7 +84,6 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
   // add the color from the mirror direction
   if (intersection.material->is_mirror &&
       current_depth < scene.max_recursion_depth) {
-    Ray reflected_ray;
     float cos_theta = dot_product(intersection.normal, normalized_eye_v);
     parser::Vec3f reflected_ray_dir =
         add_vectors(multiply_vector(normalized_eye_v, -1),
@@ -96,8 +93,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
         intersection.point,
         multiply_vector(reflected_ray_dir, scene.shadow_ray_epsilon));
 
-    reflected_ray.set_direction(reflected_ray_dir);
-    reflected_ray.set_origin(reflected_ray_origin);
+    Ray reflected_ray(reflected_ray_origin, reflected_ray_dir);
 
     Intersection reflected_intersection =
         intersect_objects(reflected_ray, scene);
