@@ -37,17 +37,14 @@ inline float get_magn(const parser::Vec3f &vec) {
 
 inline parser::Vec3f normalize(parser::Vec3f &vec) {
   parser::Vec3f result;
+  float eps = 1e-6;
   float magnitude = get_magn(vec);
-  if (magnitude == 0) {
+  if (magnitude < eps) {
     return {0, 0, 0};
   }
   result.x = vec.x / magnitude;
   result.y = vec.y / magnitude;
   result.z = vec.z / magnitude;
-  // std::cout << "magnitude: " << magnitude << std::endl;
-  // std::cout << "vec: " << vec.x << " " << vec.y << " " << vec.z << std::endl;
-  // std::cout << "normalize: " << result.x << " " << result.y << " " <<
-  // result.z << std::endl;
   return result;
 }
 
