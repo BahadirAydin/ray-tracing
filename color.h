@@ -53,8 +53,8 @@ inline parser::Vec3f calculate_specular(float phong,
 inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
                                const parser::Vec3f &intersection_point) {
   Ray shadow_ray;
-  parser::Vec3f origin = add_vectors(intersection_point,
-                                     multiply_vector(normalized_light, eps));
+  parser::Vec3f origin =
+      add_vectors(intersection_point, multiply_vector(normalized_light, eps));
   shadow_ray.set_origin(origin);
   shadow_ray.set_direction(normalized_light);
   return shadow_ray;
@@ -77,7 +77,8 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
   parser::Vec3f normalized_eye_v = normalize(eye_v);
 
   // add the color from the mirror direction
-  if (intersection.material.is_mirror) {
+  if (intersection.material.is_mirror &&
+      r.get_depth() < scene.max_recursion_depth) {
     Ray reflected_ray;
     float cos_theta = dot_product(intersection.normal, normalized_eye_v);
     parser::Vec3f reflected_ray_dir =
@@ -91,11 +92,18 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
     reflected_ray.set_direction(reflected_ray_dir);
     reflected_ray.set_origin(reflected_ray_origin);
 
-    reflected_ray.set_depth(r.get_depth() + 1);
-    color = add_vectors(
-        color,
-        multiply_vector(compute_color(scene, intersection, reflected_ray),
-                        intersection.material.phong_exponent));
+    Intersection reflected_intersection =
+        intersect_objects(reflected_ray, scene);
+
+    if (reflected_intersection.is_null) {
+      ;
+    } else {
+      reflected_ray.set_depth(r.get_depth() + 1);
+      color = add_vectors(
+          color, multiply_vector(compute_color(scene, reflected_intersection,
+                                               reflected_ray),
+                                 intersection.material.phong_exponent));
+    }
   }
 
   // add the diffuse and specular terms
@@ -126,9 +134,11 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
           intersection.material.phong_exponent, intersection.normal,
           intersection.material.specular, irradiance, normalized_half);
 
+
       color.x += diffuse.x + specular.x;
       color.y += diffuse.y + specular.y;
       color.z += diffuse.z + specular.z;
+
     }
   }
 
@@ -138,28 +148,15 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 inline parser::Vec3f compute_color(const parser::Scene &scene,
                                    const Intersection &intersection, Ray &r) {
 
-  if (r.get_depth() > scene.max_recursion_depth) {
-
-    parser::Vec3f color = {0, 0, 0};
-    return color;
-  }
-
   if (!intersection.is_null) {
     return apply_shading(scene, intersection, r);
-  } else if (r.get_depth() == 0) {
-    parser::Vec3f background_color = {(float)scene.background_color.x,
-                                      (float)scene.background_color.y,
-                                      (float)scene.background_color.z};
-    return background_color;
+
   } else {
-    parser::Vec3f color = {0, 0, 0};
+    parser::Vec3f color = {(float)scene.background_color.x,
+                           (float)scene.background_color.y,
+                           (float)scene.background_color.z};
     return color;
   }
-}
-
-inline parser::Vec3i compute_background_color(const parser::Scene &scene) {
-  parser::Vec3i color = scene.background_color;
-  return color;
 }
 
 #endif

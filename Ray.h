@@ -26,11 +26,11 @@ public:
               << direction.z << std::endl;
   }
 
-  void init_depth() { depth = 0; }
+  void init_depth() { this->depth = 0; }
 
   int get_depth() { return depth; }
 
-  int inc_depth(int val) {
+  int inc_depth() {
     this->depth += 1;
     return this->depth;
   }
