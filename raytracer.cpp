@@ -35,11 +35,11 @@ int main(int argc, char *argv[]) {
 
         // find the closest intersection with an object for each ray
         Intersection intersection = intersect_objects(r, scene);
-        parser::Vec3f color = compute_color(scene, intersection, r);
-        color = clamp(color);
-        image[i++] = color.x + 0.5;
-        image[i++] = color.y + 0.5;
-        image[i++] = color.z + 0.5;
+        // color is clamped and added +0.5 in the compute_color function
+        parser::Vec3i color = compute_color(scene, intersection, r);
+        image[i++] = color.x;
+        image[i++] = color.y;
+        image[i++] = color.z;
       }
     }
 

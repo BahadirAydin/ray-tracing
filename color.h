@@ -7,7 +7,7 @@
 #include "utils.h"
 #include <limits>
 
-inline parser::Vec3f compute_color(const parser::Scene &scene,
+inline parser::Vec3i compute_color(const parser::Scene &scene,
                                    const Intersection &intersection, Ray &r);
 
 inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
@@ -104,7 +104,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 
     if (!reflected_intersection.is_null && reflected_intersection.t > 0.0f) {
       reflected_ray.set_depth(current_depth + 1);
-      parser::Vec3f reflected_color =
+      parser::Vec3i reflected_color =
           compute_color(scene, reflected_intersection, reflected_ray);
 
       reflected_color.x *= intersection.material->mirror.x;
@@ -154,18 +154,17 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
   return color;
 }
 
-inline parser::Vec3f compute_color(const parser::Scene &scene,
+inline parser::Vec3i compute_color(const parser::Scene &scene,
                                    const Intersection &intersection, Ray &r) {
 
   if (r.get_depth() > scene.max_recursion_depth) {
     return {0, 0, 0};
   }
   if (!intersection.is_null) {
-    return apply_shading(scene, intersection, r);
+    return float_to_int_color(clamp(apply_shading(scene, intersection, r)));
 
   } else if (r.get_depth() == 0) {
-    return {(float)scene.background_color.x, (float)scene.background_color.y,
-            (float)scene.background_color.z};
+    return scene.background_color;
 
   } else {
     return {0, 0, 0};

@@ -55,7 +55,7 @@ inline float calc_det(float x00, float x01, float x02, float x10, float x11,
          (x20 * ((x01 * x12) - (x02 * x11)));
 }
 
-inline parser::Vec3f clamp(parser::Vec3f &color) {
+inline parser::Vec3f clamp(const parser::Vec3f &color) {
   parser::Vec3f c;
   c.x = std::max(0.0f, std::min(255.0f, color.x));
   c.y = std::max(0.0f, std::min(255.0f, color.y));
@@ -70,6 +70,14 @@ inline parser::Vec3f calculate_triangle_normal(const parser::Vec3f &vertex1,
   parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
   parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
   return normalize(cross_product(edge1, edge2));
+}
+
+inline parser::Vec3i float_to_int_color(const parser::Vec3f &color) {
+  parser::Vec3i c;
+  c.x = static_cast<int>(color.x + 0.5);
+  c.y = static_cast<int>(color.y + 0.5);
+  c.z = static_cast<int>(color.z + 0.5);
+  return c;
 }
 
 #endif // UTILS_H
