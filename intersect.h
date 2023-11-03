@@ -13,7 +13,7 @@ struct Intersection {
   parser::Vec3f normal;
   const parser::Material *material;
   float t;
-  int is_null = 1;
+  bool is_null = true;
 };
 
 inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
@@ -51,9 +51,9 @@ inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
 
 inline float intersect_triangle(const parser::Vec3f &vertex1,
                                 const parser::Vec3f &vertex2,
-                                const parser::Vec3f &vertex3, const Ray &r) {
-  const parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
-  const parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
+                                const parser::Vec3f &vertex3,
+                                const parser::Vec3f edge1,
+                                const parser::Vec3f edge2, const Ray &r) {
   const parser::Vec3f h = cross_product(r.get_direction(), edge2);
   float a = dot_product(edge1, h);
 
@@ -97,7 +97,7 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
       intersection.material = &s.materials[sphere.material_id - 1];
       intersection.t = t;
       min_intersection = intersection;
-      min_intersection.is_null = 0;
+      min_intersection.is_null = false;
     }
   }
 
@@ -106,18 +106,17 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
     const parser::Vec3f vertex2 = s.vertex_data[triangle.indices.v1_id - 1];
     const parser::Vec3f vertex3 = s.vertex_data[triangle.indices.v2_id - 1];
 
-    float t = intersect_triangle(vertex1, vertex2, vertex3, r);
+    float t = intersect_triangle(vertex1, vertex2, vertex3, triangle.edge1, triangle.edge2, r);
 
     if (t > 0.0f && t < min_intersection.t) {
       Intersection intersection;
       intersection.point = r.get_point(t);
 
-      intersection.normal =
-          calculate_triangle_normal(vertex1, vertex2, vertex3);
+      intersection.normal = triangle.normal;
       intersection.material = &s.materials[triangle.material_id - 1];
       intersection.t = t;
       min_intersection = intersection;
-      min_intersection.is_null = 0;
+      min_intersection.is_null = false;
     }
   }
 
@@ -127,20 +126,17 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
       const parser::Vec3f vertex2 = s.vertex_data[face.v1_id - 1];
       const parser::Vec3f vertex3 = s.vertex_data[face.v2_id - 1];
 
-      const parser::Vec3f triangle_normal =
-          calculate_triangle_normal(vertex1, vertex2, vertex3);
-
-      float t = intersect_triangle(vertex1, vertex2, vertex3, r);
+      float t = intersect_triangle(vertex1, vertex2, vertex3, face.edge1,
+                                   face.edge2, r);
 
       if (t > 0.0f && t < min_intersection.t) {
         Intersection intersection;
         intersection.point = r.get_point(t);
-        intersection.normal = triangle_normal;
-
+        intersection.normal = face.normal;
         intersection.material = &s.materials[mesh.material_id - 1];
         intersection.t = t;
         min_intersection = intersection;
-        min_intersection.is_null = 0;
+        min_intersection.is_null = false;
       }
     }
   }

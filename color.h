@@ -15,10 +15,11 @@ inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
                                           const parser::Vec3f &normal,
                                           float distance_to_light) {
 
+  float distance_to_light_squared = std::pow(distance_to_light, 2);
   if (distance_to_light > 0.0f) {
-    float irradiance_x = light.intensity.x / std::pow(distance_to_light, 2);
-    float irradiance_y = light.intensity.y / std::pow(distance_to_light, 2);
-    float irradiance_z = light.intensity.z / std::pow(distance_to_light, 2);
+    float irradiance_x = light.intensity.x / distance_to_light_squared;
+    float irradiance_y = light.intensity.y / distance_to_light_squared;
+    float irradiance_z = light.intensity.z / distance_to_light_squared;
     return {irradiance_x, irradiance_y, irradiance_z};
   }
   return {0, 0, 0};

@@ -161,6 +161,11 @@ void parser::Scene::loadFromXml(const std::string &filepath) {
     Face face;
     while (!(stream >> face.v0_id).eof()) {
       stream >> face.v1_id >> face.v2_id;
+      face.normal = calculate_triangle_normal(vertex_data[face.v0_id - 1],
+                                              vertex_data[face.v1_id - 1],
+                                              vertex_data[face.v2_id - 1]);
+      face.edge1 = subtract_vectors(vertex_data[face.v1_id - 1],vertex_data[face.v0_id - 1]);
+      face.edge2 = subtract_vectors(vertex_data[face.v2_id - 1],vertex_data[face.v0_id - 1]);
       mesh.faces.push_back(face);
     }
     stream.clear();
@@ -185,6 +190,16 @@ void parser::Scene::loadFromXml(const std::string &filepath) {
     stream >> triangle.indices.v0_id >> triangle.indices.v1_id >>
         triangle.indices.v2_id;
 
+    triangle.normal =
+        calculate_triangle_normal(vertex_data[triangle.indices.v0_id - 1],
+                                  vertex_data[triangle.indices.v1_id - 1],
+                                  vertex_data[triangle.indices.v2_id - 1]);
+    triangle.edge1 = subtract_vectors(
+        vertex_data[triangle.indices.v1_id - 1],
+        vertex_data[triangle.indices.v0_id - 1]);
+    triangle.edge2 = subtract_vectors(
+        vertex_data[triangle.indices.v2_id - 1],
+        vertex_data[triangle.indices.v0_id - 1]);
     triangles.push_back(triangle);
     element = element->NextSiblingElement("Triangle");
   }
