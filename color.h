@@ -152,14 +152,18 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 inline parser::Vec3f compute_color(const parser::Scene &scene,
                                    const Intersection &intersection, Ray &r) {
 
+  if (r.get_depth() > scene.max_recursion_depth) {
+    return {0, 0, 0};
+  }
   if (!intersection.is_null) {
     return apply_shading(scene, intersection, r);
 
+  } else if (r.get_depth() == 0) {
+    return {(float)scene.background_color.x, (float)scene.background_color.y,
+            (float)scene.background_color.z};
+
   } else {
-    parser::Vec3f color = {(float)scene.background_color.x,
-                           (float)scene.background_color.y,
-                           (float)scene.background_color.z};
-    return color;
+    return {0, 0, 0};
   }
 }
 
