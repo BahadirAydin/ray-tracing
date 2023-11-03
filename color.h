@@ -95,9 +95,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
     Intersection reflected_intersection =
         intersect_objects(reflected_ray, scene);
 
-    if (reflected_intersection.is_null) {
-      ;
-    } else {
+    if (!reflected_intersection.is_null) {
       reflected_ray.set_depth(r.get_depth() + 1);
       color = add_vectors(
           color, multiply_vector(compute_color(scene, reflected_intersection,
@@ -122,7 +120,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
     float min_t = shadow_intersection.t;
 
     if (min_t == std::numeric_limits<float>::infinity() ||
-        min_t - get_magn(to_light_normalized) < 0.0f) {
+        min_t < get_magn(to_light_normalized)) {
       parser::Vec3f irradiance = calculate_irradiance(
           light, to_light_normalized, intersection.normal, distance_to_light);
       parser::Vec3f diffuse =
@@ -134,11 +132,9 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
           intersection.material.phong_exponent, intersection.normal,
           intersection.material.specular, irradiance, normalized_half);
 
-
       color.x += diffuse.x + specular.x;
       color.y += diffuse.y + specular.y;
       color.z += diffuse.z + specular.z;
-
     }
   }
 
