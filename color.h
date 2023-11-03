@@ -69,9 +69,9 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
 
   // start with the ambient light
   parser::Vec3f ambient_color = {
-      scene.ambient_light.x * intersection.material.ambient.x,
-      scene.ambient_light.y * intersection.material.ambient.y,
-      scene.ambient_light.z * intersection.material.ambient.z};
+      scene.ambient_light.x * intersection.material->ambient.x,
+      scene.ambient_light.y * intersection.material->ambient.y,
+      scene.ambient_light.z * intersection.material->ambient.z};
 
   parser::Vec3f color;
   color.x = ambient_color.x;
@@ -83,7 +83,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
   int current_depth = r.get_depth();
 
   // add the color from the mirror direction
-  if (intersection.material.is_mirror &&
+  if (intersection.material->is_mirror &&
       current_depth < scene.max_recursion_depth) {
     Ray reflected_ray;
     float cos_theta = dot_product(intersection.normal, normalized_eye_v);
@@ -106,9 +106,9 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       parser::Vec3f reflected_color =
           compute_color(scene, reflected_intersection, reflected_ray);
 
-      reflected_color.x *= intersection.material.mirror.x;
-      reflected_color.y *= intersection.material.mirror.y;
-      reflected_color.z *= intersection.material.mirror.z;
+      reflected_color.x *= intersection.material->mirror.x;
+      reflected_color.y *= intersection.material->mirror.y;
+      reflected_color.z *= intersection.material->mirror.z;
 
       color.x += reflected_color.x;
       color.y += reflected_color.y;
@@ -136,13 +136,13 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       parser::Vec3f irradiance = calculate_irradiance(
           light, to_light_normalized, intersection.normal, distance_to_light);
       parser::Vec3f diffuse =
-          calculate_diffuse(intersection.material.diffuse, irradiance,
+          calculate_diffuse(intersection.material->diffuse, irradiance,
                             intersection.normal, to_light_normalized);
       parser::Vec3f half = add_vectors(to_light_normalized, normalized_eye_v);
       parser::Vec3f normalized_half = normalize(half);
       parser::Vec3f specular = calculate_specular(
-          intersection.material.phong_exponent, intersection.normal,
-          intersection.material.specular, irradiance, normalized_half);
+          intersection.material->phong_exponent, intersection.normal,
+          intersection.material->specular, irradiance, normalized_half);
 
       color.x += diffuse.x + specular.x;
       color.y += diffuse.y + specular.y;

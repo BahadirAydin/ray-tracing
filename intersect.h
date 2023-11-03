@@ -11,7 +11,7 @@
 struct Intersection {
   parser::Vec3f point;
   parser::Vec3f normal;
-  parser::Material material;
+  const parser::Material *material;
   float t;
   int is_null = 1;
 };
@@ -97,7 +97,7 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
       intersection.point = r.get_point(t);
       parser::Vec3f normal = subtract_vectors(intersection.point, center);
       intersection.normal = normalize(normal);
-      intersection.material = s.materials[sphere.material_id - 1];
+      intersection.material = &s.materials[sphere.material_id - 1];
       intersection.t = t;
       min_intersection = intersection;
       min_intersection.is_null = 0;
@@ -119,7 +119,7 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
       parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
       parser::Vec3f cross_val = cross_product(edge1, edge2);
       intersection.normal = normalize(cross_val);
-      intersection.material = s.materials[triangle.material_id - 1];
+      intersection.material = &s.materials[triangle.material_id - 1];
       intersection.t = t;
       min_intersection = intersection;
       min_intersection.is_null = 0;
@@ -143,7 +143,7 @@ inline Intersection intersect_objects(const Ray &r, const parser::Scene &s) {
         parser::Vec3f cross_val = cross_product(edge1, edge2);
         intersection.normal = normalize(cross_val);
 
-        intersection.material = s.materials[mesh.material_id - 1];
+        intersection.material = &s.materials[mesh.material_id - 1];
         intersection.t = t;
         min_intersection = intersection;
         min_intersection.is_null = 0;
