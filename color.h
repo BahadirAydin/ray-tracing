@@ -41,12 +41,16 @@ inline parser::Vec3f calculate_specular(float phong,
                                         const parser::Vec3f &material_specular,
                                         const parser::Vec3f &irradiance,
                                         const parser::Vec3f &half) {
+
   parser::Vec3f specular = {0, 0, 0};
-  float a = std::max(0.0f, dot_product(normal, half));
-  float b = std::pow(a, phong);
-  specular.x = material_specular.x * irradiance.x * b;
-  specular.y = material_specular.y * irradiance.y * b;
-  specular.z = material_specular.z * irradiance.z * b;
+  float cos_alpha_prime = std::max(0.0f, dot_product(normal, half));
+
+  if (dot_product(normal, half) > 0) {
+    float b = std::pow(cos_alpha_prime, phong);
+    specular.x = material_specular.x * irradiance.x * b;
+    specular.y = material_specular.y * irradiance.y * b;
+    specular.z = material_specular.z * irradiance.z * b;
+  }
   return specular;
 }
 
