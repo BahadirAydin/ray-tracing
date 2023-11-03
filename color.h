@@ -60,7 +60,7 @@ inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
   parser::Vec3f origin =
       add_vectors(intersection_point, multiply_vector(normalized_light, eps));
   shadow_ray.set_origin(origin);
-  shadow_ray.set_direction(normalized_light);
+  shadow_ray.set_direction(multiply_vector(normalized_light, eps));
   return shadow_ray;
 }
 
