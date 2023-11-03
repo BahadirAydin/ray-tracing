@@ -30,9 +30,6 @@ int main(int argc, char *argv[]) {
         // compute the viewing ray
         Ray r = generate_ray(cam, x, y, pixel_width, pixel_height);
 
-        // primary ray
-        r.init_depth();
-
         // find the closest intersection with an object for each ray
         Intersection intersection = intersect_objects(r, scene);
         // color is clamped and added +0.5 in the compute_color function

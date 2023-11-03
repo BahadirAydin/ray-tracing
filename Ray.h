@@ -26,8 +26,6 @@ public:
               << direction.z << std::endl;
   }
 
-  void init_depth() { this->depth = 0; }
-
   int get_depth() { return depth; }
 
   int inc_depth() {
