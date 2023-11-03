@@ -49,18 +49,17 @@ private:
 inline Ray generate_ray(const parser::Camera &camera, int i, int j,
                         float pixel_width, float pixel_height) {
 
-  parser::Vec3f e = camera.position;
-  parser::Vec3f gaze = camera.gaze;
-  parser::Vec3f v = camera.up;
-  parser::Vec3f w = camera.w;
-  parser::Vec3f u = camera.u;
-  parser::Vec3f q = camera.q;
-  parser::Vec4f near_plane = camera.near_plane;
-  parser::Vec3f m = camera.plane_center;
-  float distance = camera.near_distance;
+  const parser::Vec3f e = camera.position;
+  const parser::Vec3f v = camera.up;
+  const parser::Vec3f w = camera.w;
+  const parser::Vec3f u = camera.u;
+  const parser::Vec3f q = camera.q;
+  const parser::Vec4f near_plane = camera.near_plane;
+  const parser::Vec3f m = camera.plane_center;
+  const float distance = camera.near_distance;
 
-  float su = (i + 0.5) * pixel_width;
-  float sv = (j + 0.5) * pixel_height;
+  float su = (i + 0.5f) * pixel_width;
+  float sv = (j + 0.5f) * pixel_height;
 
   parser::Vec3f s = add_vectors(
       q, add_vectors(multiply_vector(u, su), multiply_vector(v, -1 * sv)));
