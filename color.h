@@ -15,7 +15,7 @@ inline parser::Vec3f calculate_irradiance(const parser::PointLight &light,
                                           const parser::Vec3f &normal,
                                           float distance_to_light) {
 
-  if (distance_to_light > 0) {
+  if (distance_to_light > 0.0f) {
     float irradiance_x = light.intensity.x / std::pow(distance_to_light, 2);
     float irradiance_y = light.intensity.y / std::pow(distance_to_light, 2);
     float irradiance_z = light.intensity.z / std::pow(distance_to_light, 2);
@@ -101,7 +101,7 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
     Intersection reflected_intersection =
         intersect_objects(reflected_ray, scene);
 
-    if (!reflected_intersection.is_null && reflected_intersection.t > 0) {
+    if (!reflected_intersection.is_null && reflected_intersection.t > 0.0f) {
       reflected_ray.set_depth(current_depth + 1);
       parser::Vec3f reflected_color =
           compute_color(scene, reflected_intersection, reflected_ray);

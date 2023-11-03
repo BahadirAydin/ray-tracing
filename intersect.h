@@ -21,27 +21,28 @@ inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
   parser::Vec3f origin = r.get_origin();
   parser::Vec3f direction = r.get_direction();
 
-  float a = dot_product(direction, direction);
-  float b = 2 * dot_product(direction, subtract_vectors(origin, vertex));
-  float c = dot_product(subtract_vectors(origin, vertex),
-                        subtract_vectors(origin, vertex)) -
-            radius * radius;
-  float delta = b * b - 4 * a * c;
-  if (delta > -0.00001 && delta < 0.00001) {
+  const float a = dot_product(direction, direction);
+  const float b = 2 * dot_product(direction, subtract_vectors(origin, vertex));
+  const float c = dot_product(subtract_vectors(origin, vertex),
+                              subtract_vectors(origin, vertex)) -
+                  std::pow(radius, 2);
+  float delta = std::pow(b, 2) - 4 * a * c;
+  if (delta < 0.0f) {
     return -1;
   }
+  const float eps = 1e-6;
   float t1 = (-b + std::sqrt(delta)) / (2 * a);
   float t2 = (-b - std::sqrt(delta)) / (2 * a);
 
-  if (t1 < 0.0f && t2 < 0.0f) {
+  if (t1 < eps && t2 < eps) {
     return -1;
   }
 
-  if (t1 > -0.00001 && t1 < 0.00001) {
+  if (t1 < eps) {
     return t2;
   }
 
-  if (t2 > -0.00001 && t2 < 0.00001) {
+  if (t2 < eps) {
     return t1;
   }
 
@@ -51,30 +52,30 @@ inline float intersect_sphere(const parser::Vec3f &vertex, float radius,
 inline float intersect_triangle(const parser::Vec3f &vertex1,
                                 const parser::Vec3f &vertex2,
                                 const parser::Vec3f &vertex3, const Ray &r) {
-  parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
-  parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
-  parser::Vec3f h = cross_product(r.get_direction(), edge2);
+  const parser::Vec3f edge1 = subtract_vectors(vertex2, vertex1);
+  const parser::Vec3f edge2 = subtract_vectors(vertex3, vertex1);
+  const parser::Vec3f h = cross_product(r.get_direction(), edge2);
   float a = dot_product(edge1, h);
 
   if (std::abs(a) < std::numeric_limits<float>::epsilon()) {
     return -1;
   }
 
-  float f = 1.0f / a;
+  const float f = 1.0f / a;
   parser::Vec3f s = subtract_vectors(r.get_origin(), vertex1);
-  float u = f * dot_product(s, h);
+  const float u = f * dot_product(s, h);
 
   if (u < 0.0f || u > 1.0f)
     return -1;
 
   parser::Vec3f q = cross_product(s, edge1);
-  float v = f * dot_product(r.get_direction(), q);
+  const float v = f * dot_product(r.get_direction(), q);
 
   if (v < 0.0f || u + v > 1.0f)
     return -1;
 
-  float t = f * dot_product(edge2, q);
-  if (t > 0.0f)
+  const float t = f * dot_product(edge2, q);
+  if (t > std::numeric_limits<float>::epsilon())
     return t;
 
   return -1;
