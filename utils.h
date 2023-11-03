@@ -35,7 +35,7 @@ inline float get_magn(const parser::Vec3f &vec) {
   return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
 
-inline parser::Vec3f normalize(parser::Vec3f &vec) {
+inline parser::Vec3f normalize(const parser::Vec3f &vec) {
   parser::Vec3f result;
   float eps = 1e-6;
   float magnitude = get_magn(vec);
