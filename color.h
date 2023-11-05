@@ -59,9 +59,9 @@ inline parser::Vec3f calculate_specular(float phong,
 
 inline Ray generate_shadow_ray(float eps, const parser::Vec3f &normalized_light,
                                const parser::Vec3f &intersection_point) {
+  const parser::Vec3f direction = normalized_light;
   const parser::Vec3f origin =
-      add_vectors(intersection_point, multiply_vector(normalized_light, eps));
-  const parser::Vec3f direction = multiply_vector(normalized_light, eps);
+      add_vectors(intersection_point, multiply_vector(direction, eps));
   return Ray(origin, direction);
 }
 
@@ -120,6 +120,9 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
   for (const parser::PointLight &light : scene.point_lights) {
     parser::Vec3f to_light =
         subtract_vectors(light.position, intersection.point);
+    if (dot_product(intersection.normal, to_light) < 0) {
+      continue;
+    }
     parser::Vec3f to_light_normalized = normalize(to_light);
 
     Ray shadow_ray = generate_shadow_ray(
@@ -129,9 +132,10 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
     float distance_to_light = get_magn(to_light);
 
     float min_t = shadow_intersection.t;
-
+    float dist = get_magn(
+        subtract_vectors(shadow_intersection.point, intersection.point));
     if (min_t == std::numeric_limits<float>::infinity() ||
-        min_t < get_magn(to_light_normalized)) {
+        (min_t > 0 && dist > distance_to_light)) {
       parser::Vec3f irradiance = calculate_irradiance(
           light, to_light_normalized, intersection.normal, distance_to_light);
       parser::Vec3f diffuse =
