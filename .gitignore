@@ -2,7 +2,7 @@ raytracer
 
 # Prerequisites
 *.d
-*.ppm
+test_scenes/
 .clang-format
 
 # Compiled Object files
