@@ -46,14 +46,10 @@ inline parser::Vec3f calculate_specular(float phong,
 
   parser::Vec3f specular = {0, 0, 0};
   float cos_alpha_prime = std::max(0.0f, dot_product(normal, half));
-  float angle = angle_bw_vectors(to_light, half);
-
-  // if (angle < 90) {
   float b = std::pow(cos_alpha_prime, phong);
   specular.x = material_specular.x * irradiance.x * b;
   specular.y = material_specular.y * irradiance.y * b;
   specular.z = material_specular.z * irradiance.z * b;
-  // }
   return specular;
 }
 
