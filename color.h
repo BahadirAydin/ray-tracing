@@ -41,12 +41,14 @@ inline parser::Vec3f calculate_specular(float phong,
                                         const parser::Vec3f &normal,
                                         const parser::Vec3f &material_specular,
                                         const parser::Vec3f &irradiance,
-                                        const parser::Vec3f &half) {
+                                        const parser::Vec3f &half,
+                                        const parser::Vec3f &to_light) {
 
   parser::Vec3f specular = {0, 0, 0};
   float cos_alpha_prime = std::max(0.0f, dot_product(normal, half));
+  float degree = angle_bw_degress(to_light, half);
 
-  if (dot_product(normal, half) > 0) {
+  if (degree < 90) {
     float b = std::pow(cos_alpha_prime, phong);
     specular.x = material_specular.x * irradiance.x * b;
     specular.y = material_specular.y * irradiance.y * b;
@@ -139,7 +141,8 @@ inline parser::Vec3f apply_shading(const parser::Scene &scene,
       parser::Vec3f normalized_half = normalize(half);
       parser::Vec3f specular = calculate_specular(
           intersection.material->phong_exponent, intersection.normal,
-          intersection.material->specular, irradiance, normalized_half);
+          intersection.material->specular, irradiance, normalized_half,
+          to_light);
 
       color.x += diffuse.x + specular.x;
       color.y += diffuse.y + specular.y;

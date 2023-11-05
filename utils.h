@@ -80,4 +80,14 @@ inline parser::Vec3i float_to_int_color(const parser::Vec3f &color) {
   return c;
 }
 
+inline float angle_bw_degress(const parser::Vec3f &vec1,
+                              const parser::Vec3f &vec2) {
+  float dot = dot_product(vec1, vec2);
+  float mag_vec1 = get_magn(vec1);
+  float mag_vec2 = get_magn(vec2);
+  float cosine = dot / (mag_vec1 * mag_vec2);
+  float angle = acos(cosine);
+  return angle * (180.0 / M_PI);
+}
+
 #endif // UTILS_H
