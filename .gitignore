@@ -4,6 +4,7 @@ raytracer
 *.d
 test_scenes/
 .clang-format
+*.ppm
 
 # Compiled Object files
 *.slo
